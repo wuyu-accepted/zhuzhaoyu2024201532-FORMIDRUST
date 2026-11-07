@@ -281,7 +281,7 @@ enum Commands {
         #[arg(short, long)]
         model: PathBuf,
         //默认查看最近学到的 10 个新 token
-        #[arg(long, default_value_t = 10)]
+        #[arg(long="top", default_value_t = 10)]
         top_k: usize,
     },
 }
