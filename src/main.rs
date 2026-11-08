@@ -14,6 +14,7 @@ struct Model {
 fn bytes_to_ids(text: &str) -> Vec<u32> {
     text.bytes().map(u32::from).collect()
 }
+//在一串 token ID 中，把指定的相邻 token 对替换成一个新的 ID，并返回替换后的新序列。
 fn merge_pair(ids:&[u32],pair:Pair,new_id:u32)->Vec<u32>{
     let mut result = Vec::with_capacity(ids.len());
     let mut i = 0;
@@ -78,6 +79,7 @@ impl Model{
             //None 则尚未选出候选；Some((pair,count)) 就保存当前最佳对及频次。
             let mut best: Option<(Pair, usize)> = None;
             for (pair, count) in counts{
+                //循环遍历 counts 中的每个 (pair, count)，用 replace 判断是否要更新最佳候选
                 let replace=match best{
                     None=>true,
                     Some((best_pair, best_count))=>{
@@ -88,6 +90,7 @@ impl Model{
                     best = Some((pair, count));
                 }
             }
+            //取出最佳候选
             let (pair, count) = match best {
                 Some((pair, count)) => (pair, count),
                 None => {
@@ -121,6 +124,7 @@ impl Model{
     fn encode (&self,text:&str)->Result<Vec<u32>,String>{
         self.validate()?;
         let mut ranks=HashMap::new();
+        //把合并规则整理成一个查找表：每个相邻 token 对对应它第一次出现的规则序号。
         for (rank,&pair) in self.merges.iter().enumerate(){
             match ranks.entry(pair) {
                 std::collections::hash_map::Entry::Occupied(_) => {
